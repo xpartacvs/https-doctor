@@ -14,11 +14,13 @@ import (
 type config struct {
 	hosts    []string
 	logLevel zerolog.Level
+	schedule string
 }
 
 type Config interface {
 	Hosts() []string
 	ZerologLevel() zerolog.Level
+	Schedule() string
 }
 
 var (
@@ -32,6 +34,10 @@ func (c *config) Hosts() []string {
 
 func (c *config) ZerologLevel() zerolog.Level {
 	return c.logLevel
+}
+
+func (c *config) Schedule() string {
+	return c.schedule
 }
 
 func load() *config {
@@ -54,6 +60,7 @@ func load() *config {
 	return &config{
 		hosts:    splitCSV(fang.GetString("hosts")),
 		logLevel: setLogLevel(fang.GetString("loglevel")),
+		schedule: setDefaultString(fang.GetString("schedule"), "0 0 * * *", true),
 	}
 }
 
@@ -83,6 +90,16 @@ func setLogLevel(l string) zerolog.Level {
 	default:
 		return zerolog.Disabled
 	}
+}
+
+func setDefaultString(value, fallback string, trimSpace bool) string {
+	if trimSpace {
+		value = strings.TrimSpace(value)
+	}
+	if len(value) <= 0 {
+		return fallback
+	}
+	return value
 }
 
 func Get() Config {
