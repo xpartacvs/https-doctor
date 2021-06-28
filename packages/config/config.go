@@ -12,10 +12,11 @@ import (
 )
 
 type config struct {
-	hosts         []string
-	logLevel      zerolog.Level
-	schedule      string
-	dishookBotMsg string
+	hosts          []string
+	logLevel       zerolog.Level
+	schedule       string
+	dishookBotMsg  string
+	dishookBotName string
 }
 
 type Config interface {
@@ -23,6 +24,7 @@ type Config interface {
 	ZerologLevel() zerolog.Level
 	Schedule() string
 	DishookBotMessage() string
+	DishookBotName() string
 }
 
 var (
@@ -46,6 +48,10 @@ func (c *config) DishookBotMessage() string {
 	return c.dishookBotMsg
 }
 
+func (c *config) DishookBotName() string {
+	return c.DishookBotName()
+}
+
 func load() *config {
 	fang := viper.New()
 
@@ -64,10 +70,11 @@ func load() *config {
 	_ = fang.ReadInConfig()
 
 	return &config{
-		hosts:         splitCSV(fang.GetString("hosts")),
-		logLevel:      setLogLevel(fang.GetString("loglevel")),
-		schedule:      setDefaultString(fang.GetString("schedule"), "0 0 * * *", true),
-		dishookBotMsg: setDefaultString(fang.GetString("dishook.bot.message"), "Your HTTPS health monitoring result", true),
+		hosts:          splitCSV(fang.GetString("hosts")),
+		logLevel:       setLogLevel(fang.GetString("loglevel")),
+		schedule:       setDefaultString(fang.GetString("schedule"), "0 0 * * *", true),
+		dishookBotMsg:  setDefaultString(fang.GetString("dishook.bot.message"), "Your HTTPS health monitoring result", true),
+		dishookBotName: setDefaultString(fang.GetString("dishook.bot.name"), "HTTPS Doctor", true),
 	}
 }
 
