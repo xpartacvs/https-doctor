@@ -17,6 +17,7 @@ type config struct {
 	schedule       string
 	dishookBotMsg  string
 	dishookBotName string
+	dishookBotAva  string
 }
 
 type Config interface {
@@ -25,6 +26,7 @@ type Config interface {
 	Schedule() string
 	DishookBotMessage() string
 	DishookBotName() string
+	DishookBotAvatar() string
 }
 
 var (
@@ -52,6 +54,10 @@ func (c *config) DishookBotName() string {
 	return c.DishookBotName()
 }
 
+func (c *config) DishookBotAvatar() string {
+	return c.dishookBotAva
+}
+
 func load() *config {
 	fang := viper.New()
 
@@ -75,6 +81,7 @@ func load() *config {
 		schedule:       setDefaultString(fang.GetString("schedule"), "0 0 * * *", true),
 		dishookBotMsg:  setDefaultString(fang.GetString("dishook.bot.message"), "Your HTTPS health monitoring result", true),
 		dishookBotName: setDefaultString(fang.GetString("dishook.bot.name"), "HTTPS Doctor", true),
+		dishookBotAva:  setDefaultString(fang.GetString("dishook.bot.avatar"), "https://www.a-trust.at/MediaProvider/2107/ssl.png", true),
 	}
 }
 
