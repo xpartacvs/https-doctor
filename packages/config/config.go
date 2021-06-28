@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"time"
 	"unicode"
 
 	"github.com/rs/zerolog"
@@ -19,6 +20,7 @@ type config struct {
 	dishookBotName string
 	dishookBotAva  string
 	dishookUrl     string
+	location       *time.Location
 }
 
 type Config interface {
@@ -29,6 +31,7 @@ type Config interface {
 	DishookBotName() string
 	DishookBotAvatar() string
 	DishookURL() string
+	Location() *time.Location
 }
 
 var (
@@ -64,6 +67,10 @@ func (c *config) DishookURL() string {
 	return c.dishookUrl
 }
 
+func (c *config) Location() *time.Location {
+	return c.location
+}
+
 func load() *config {
 	fang := viper.New()
 
@@ -89,6 +96,7 @@ func load() *config {
 		dishookBotName: setDefaultString(fang.GetString("dishook.bot.name"), "HTTPS Doctor", true),
 		dishookBotAva:  setDefaultString(fang.GetString("dishook.bot.avatar"), "https://www.a-trust.at/MediaProvider/2107/ssl.png", true),
 		dishookUrl:     setDefaultString(fang.GetString("dishook.url"), "", true),
+		location:       setLocation(fang.GetString("tz")),
 	}
 }
 
@@ -128,6 +136,14 @@ func setDefaultString(value, fallback string, trimSpace bool) string {
 		return fallback
 	}
 	return value
+}
+
+func setLocation(timezone string) *time.Location {
+	loc, err := time.LoadLocation(strings.TrimSpace(timezone))
+	if err != nil {
+		loc = time.Local
+	}
+	return loc
 }
 
 func Get() Config {
