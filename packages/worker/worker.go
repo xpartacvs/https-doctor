@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron"
+	"github.com/rs/zerolog"
 )
 
 func Start() error {
@@ -19,7 +20,6 @@ func Start() error {
 		return err
 	}
 	scheduler.StartBlocking()
-	logger.Log().Info().Msg("Schedule is running in blocking mode")
 	return nil
 }
 
@@ -43,18 +43,29 @@ func job() {
 			switch result {
 			case client.ErrTimeout:
 				content = "Connection timeout."
+				if config.Get().ZerologLevel() != zerolog.Disabled {
+					notif.AddField(title, content, false)
+				}
 			case client.ErrConnection:
 				content = "Connection error."
+				if config.Get().ZerologLevel() != zerolog.Disabled {
+					notif.AddField(title, content, false)
+				}
 			case client.ErrCertInvalid:
 				content = "Wrong SSL certificate."
+				notif.AddField(title, content, false)
 			case client.ErrCertExpired:
 				days := int(time.Until(expiry).Hours()/24) * -1
-				content = fmt.Sprintf("Expired for %d days.", days)
+				content = fmt.Sprintf("SSL expired for %d days.", days)
+				notif.AddField(title, content, false)
 			default:
-				days := int(time.Until(expiry).Hours() / 24)
-				content = fmt.Sprintf("Expired in %d days.", days)
+				graceTime := expiry.AddDate(0, 0, config.Get().Graceperiod())
+				if time.Now().After(graceTime) {
+					days := int(time.Until(expiry).Hours() / 24)
+					content = fmt.Sprintf("SSL expired in %d days.", days)
+					notif.AddField(title, content, false)
+				}
 			}
-			notif.AddField(title, content, true)
 		}(h)
 	}
 
