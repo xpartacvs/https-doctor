@@ -9,14 +9,26 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/go-co-op/gocron"
 )
 
 func Start() error {
-
-	return execute()
+	scheduler := gocron.NewScheduler(config.Get().Location())
+	if _, err := scheduler.Cron(config.Get().Schedule()).Do(job); err != nil {
+		return err
+	}
+	scheduler.StartBlocking()
+	logger.Log().Info().Msg("Schedule is running in blocking mode")
+	return nil
 }
 
-func execute() error {
+func job() {
+	if len(config.Get().Hosts()) <= 0 {
+		logger.Log().Warn().Msg("No host to check on")
+		return
+	}
+
 	var wg sync.WaitGroup
 	notif := alert.New(config.Get().DishookBotMessage())
 	notif.SetBotName(config.Get().DishookBotName()).SetBotAvatar(config.Get().DishookBotAvatar())
@@ -49,8 +61,5 @@ func execute() error {
 	wg.Wait()
 	if err := notif.Send(config.Get().DishookURL(), true); err != nil {
 		logger.Log().Err(err)
-		return err
 	}
-
-	return nil
 }
