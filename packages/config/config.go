@@ -18,6 +18,7 @@ type config struct {
 	dishookBotMsg  string
 	dishookBotName string
 	dishookBotAva  string
+	dishookUrl     string
 }
 
 type Config interface {
@@ -27,6 +28,7 @@ type Config interface {
 	DishookBotMessage() string
 	DishookBotName() string
 	DishookBotAvatar() string
+	DishookURL() string
 }
 
 var (
@@ -51,11 +53,15 @@ func (c *config) DishookBotMessage() string {
 }
 
 func (c *config) DishookBotName() string {
-	return c.DishookBotName()
+	return c.dishookBotName
 }
 
 func (c *config) DishookBotAvatar() string {
 	return c.dishookBotAva
+}
+
+func (c *config) DishookURL() string {
+	return c.dishookUrl
 }
 
 func load() *config {
@@ -82,6 +88,7 @@ func load() *config {
 		dishookBotMsg:  setDefaultString(fang.GetString("dishook.bot.message"), "Your HTTPS health monitoring result", true),
 		dishookBotName: setDefaultString(fang.GetString("dishook.bot.name"), "HTTPS Doctor", true),
 		dishookBotAva:  setDefaultString(fang.GetString("dishook.bot.avatar"), "https://www.a-trust.at/MediaProvider/2107/ssl.png", true),
+		dishookUrl:     setDefaultString(fang.GetString("dishook.url"), "", true),
 	}
 }
 
