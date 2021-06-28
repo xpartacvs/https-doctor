@@ -21,6 +21,7 @@ type config struct {
 	dishookBotAva  string
 	dishookUrl     string
 	location       *time.Location
+	grace          int
 }
 
 type Config interface {
@@ -32,6 +33,7 @@ type Config interface {
 	DishookBotAvatar() string
 	DishookURL() string
 	Location() *time.Location
+	Graceperiod() int
 }
 
 var (
@@ -71,6 +73,10 @@ func (c *config) Location() *time.Location {
 	return c.location
 }
 
+func (c *config) Graceperiod() int {
+	return c.grace
+}
+
 func load() *config {
 	fang := viper.New()
 
@@ -88,6 +94,14 @@ func load() *config {
 
 	_ = fang.ReadInConfig()
 
+	graceperiod := fang.GetInt("graceperiod")
+	switch {
+	case graceperiod == 0:
+		graceperiod = -14
+	case graceperiod > 0:
+		graceperiod *= -1
+	}
+
 	return &config{
 		hosts:          splitCSV(fang.GetString("hosts")),
 		logLevel:       setLogLevel(fang.GetString("loglevel")),
@@ -97,6 +111,7 @@ func load() *config {
 		dishookBotAva:  setDefaultString(fang.GetString("dishook.bot.avatar"), "https://www.a-trust.at/MediaProvider/2107/ssl.png", true),
 		dishookUrl:     setDefaultString(fang.GetString("dishook.url"), "", true),
 		location:       setLocation(fang.GetString("tz")),
+		grace:          graceperiod,
 	}
 }
 
