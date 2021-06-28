@@ -12,15 +12,17 @@ import (
 )
 
 type config struct {
-	hosts    []string
-	logLevel zerolog.Level
-	schedule string
+	hosts         []string
+	logLevel      zerolog.Level
+	schedule      string
+	dishookBotMsg string
 }
 
 type Config interface {
 	Hosts() []string
 	ZerologLevel() zerolog.Level
 	Schedule() string
+	DishookBotMessage() string
 }
 
 var (
@@ -38,6 +40,10 @@ func (c *config) ZerologLevel() zerolog.Level {
 
 func (c *config) Schedule() string {
 	return c.schedule
+}
+
+func (c *config) DishookBotMessage() string {
+	return c.dishookBotMsg
 }
 
 func load() *config {
@@ -58,9 +64,10 @@ func load() *config {
 	_ = fang.ReadInConfig()
 
 	return &config{
-		hosts:    splitCSV(fang.GetString("hosts")),
-		logLevel: setLogLevel(fang.GetString("loglevel")),
-		schedule: setDefaultString(fang.GetString("schedule"), "0 0 * * *", true),
+		hosts:         splitCSV(fang.GetString("hosts")),
+		logLevel:      setLogLevel(fang.GetString("loglevel")),
+		schedule:      setDefaultString(fang.GetString("schedule"), "0 0 * * *", true),
+		dishookBotMsg: setDefaultString(fang.GetString("dishook.bot.message"), "Your HTTPS health monitoring result", true),
 	}
 }
 
