@@ -25,7 +25,7 @@ func Start() error {
 
 func job() {
 	if len(config.Get().Hosts()) <= 0 {
-		logger.Log().Warn().Msg("No host to check on")
+		logger.Log().Warn().Msg("Worker: No host to check on")
 		return
 	}
 

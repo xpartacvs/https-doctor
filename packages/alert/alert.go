@@ -3,13 +3,11 @@ package alert
 import (
 	"errors"
 
-	"github.com/rs/zerolog"
 	"github.com/xpartacvs/go-dishook"
 )
 
 type alert struct {
 	payload dishook.Payload
-	logger  *zerolog.Logger
 }
 
 type Alert interface {
@@ -18,12 +16,6 @@ type Alert interface {
 	Send(url string, flushAfter bool) error
 	SetBotName(name string) Alert
 	SetBotAvatar(url string) Alert
-	SetZerolog(logger *zerolog.Logger) Alert
-}
-
-func (a *alert) SetZerolog(logger *zerolog.Logger) Alert {
-	a.logger = logger
-	return a
 }
 
 func (a *alert) Send(url string, flushAfter bool) error {
@@ -81,6 +73,5 @@ func New(message string) Alert {
 				},
 			},
 		},
-		logger: nil,
 	}
 }
