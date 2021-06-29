@@ -2,6 +2,28 @@
 
 A https health doctor
 
+## Usage
+
+Docker is the best software distribution solution to wrap the whole things up, so here is the steps:
+
+```bash
+# Clone the repository
+git clone git@github.com:xpartacvs/https-doctor.git
+cd https-doctor
+
+# Build the image
+docker image build -t https-doctor:latest .
+
+# Run container
+docker container run \
+    -it \
+    -e DISHOOK_URL=... \
+    -e HOSTS=... \
+    https-doctor:latest
+```
+
+> **CAUTION**: Please note that container require at least 2 environment variables (`DISHOOK_URL` and `HOSTS`) to run properly. Checkout [configuration](#configuration)
+
 ## Configuration
 
 I was designed to get configured by environment variables.
