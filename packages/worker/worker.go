@@ -1,11 +1,11 @@
 package worker
 
 import (
-	"fmt"
 	"https-doctor/packages/alert"
 	"https-doctor/packages/client"
 	"https-doctor/packages/config"
 	"https-doctor/packages/logger"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -56,13 +56,13 @@ func job() {
 				notif.AddField(title, content, false)
 			case client.ErrCertExpired:
 				days := int(time.Until(expiry).Hours()/24) * -1
-				content = fmt.Sprintf("SSL expired for %d days.", days)
+				content = "SSL expired for " + strconv.Itoa(days) + " days."
 				notif.AddField(title, content, false)
 			default:
 				graceTime := expiry.AddDate(0, 0, config.Get().Graceperiod())
 				if time.Now().After(graceTime) {
 					days := int(time.Until(expiry).Hours() / 24)
-					content = fmt.Sprintf("SSL expired in %d days.", days)
+					content = "SSL expired in " + strconv.Itoa(days) + " days."
 					notif.AddField(title, content, false)
 				}
 			}

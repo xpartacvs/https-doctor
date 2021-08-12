@@ -3,7 +3,6 @@ package client
 import (
 	"crypto/tls"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -37,26 +36,8 @@ func New(hostname string, zerolog *zerolog.Logger) Client {
 
 func (c *client) GetExpiry() (Status, time.Time) {
 	protocol := "tcp"
-	hostPort := fmt.Sprintf("%s:443", c.host)
-	c.logInfo(fmt.Sprintf("Establishing TLS connection to %s://%s", protocol, hostPort))
-
-	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	// defer cancel()
-
-	// dialer := tls.Dialer{}
-	// netConn, err := dialer.DialContext(ctx, "tcp", hostPort)
-	// if err != nil {
-	// 	c.logWarn(err)
-	// 	return ErrConnection, time.Now()
-	// }
-	// defer netConn.Close()
-
-	// tlsConn := tls.Client(netConn, &tls.Config{InsecureSkipVerify: true})
-	// defer tlsConn.Close()
-	// if err = tlsConn.Handshake(); err != nil {
-	// 	c.logWarn(err)
-	// 	return ErrConnection, time.Now()
-	// }
+	hostPort := c.host + ":443"
+	c.logInfo("Establishing TLS connection to " + protocol + "://" + hostPort)
 
 	tlsConn, err := tls.Dial(protocol, hostPort, nil)
 	if err != nil {
