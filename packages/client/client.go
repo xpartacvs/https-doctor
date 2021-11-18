@@ -10,31 +10,26 @@ import (
 
 type Status int8
 
-type client struct {
+type Client struct {
 	host   string
 	logger *zerolog.Logger
 }
 
-type Client interface {
-	GetExpiry() (Status, time.Time)
-}
-
-const (
-	Ok Status = iota
-	ErrConnection
-	ErrTimeout
-	ErrCertInvalid
-	ErrCertExpired
+var (
+	ErrConnection  error = errors.New("connection error")
+	ErrTimeout     error = errors.New("connection timeout")
+	ErrCertInvalid error = errors.New("invalid certificate")
+	ErrCertExpired error = errors.New("certificate has been expired")
 )
 
-func New(hostname string, zerolog *zerolog.Logger) Client {
-	return &client{
+func New(hostname string, zerolog *zerolog.Logger) *Client {
+	return &Client{
 		host:   hostname,
 		logger: zerolog,
 	}
 }
 
-func (c *client) GetExpiry() (Status, time.Time) {
+func (c *Client) GetExpiry() (*time.Time, error) {
 	protocol := "tcp"
 	hostPort := c.host + ":443"
 	c.logInfo("Establishing TLS connection to " + protocol + "://" + hostPort)
@@ -42,32 +37,32 @@ func (c *client) GetExpiry() (Status, time.Time) {
 	tlsConn, err := tls.Dial(protocol, hostPort, nil)
 	if err != nil {
 		c.logWarn(err)
-		return ErrConnection, time.Now()
+		return nil, ErrConnection
 	}
 	defer tlsConn.Close()
 
 	if err = tlsConn.VerifyHostname(c.host); err != nil {
 		c.logWarn(err)
-		return ErrCertInvalid, time.Now()
+		return nil, ErrCertInvalid
 	}
 
 	expiry := tlsConn.ConnectionState().PeerCertificates[0].NotAfter
 	if time.Until(expiry) <= 0 {
 		c.logWarn(errors.New("certificate has been expired"))
-		return ErrCertExpired, expiry
+		return &expiry, ErrCertExpired
 	}
 
 	c.logInfo("Operation succeeded")
-	return Ok, expiry
+	return &expiry, nil
 }
 
-func (c *client) logWarn(err error) {
+func (c *Client) logWarn(err error) {
 	if c.logger != nil {
 		c.logger.Warn().Msgf("%s: %s", c.host, err.Error())
 	}
 }
 
-func (c *client) logInfo(info string) {
+func (c *Client) logInfo(info string) {
 	if c.logger != nil {
 		c.logger.Info().Msgf("%s: %s", c.host, info)
 	}
