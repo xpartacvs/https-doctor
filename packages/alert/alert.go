@@ -6,19 +6,11 @@ import (
 	"github.com/xpartacvs/go-dishook"
 )
 
-type alert struct {
+type Alert struct {
 	payload dishook.Payload
 }
 
-type Alert interface {
-	AddField(title, content string, inline bool) Alert
-	FlushFields() Alert
-	Send(url string, flushAfter bool) error
-	SetBotName(name string) Alert
-	SetBotAvatar(url string) Alert
-}
-
-func (a *alert) Send(url string, flushAfter bool) error {
+func (a *Alert) Send(url string, flushAfter bool) error {
 	for _, e := range a.payload.Embeds {
 		if len(e.Fields) <= 0 {
 			return errors.New("alert has nothing to send")
@@ -31,14 +23,14 @@ func (a *alert) Send(url string, flushAfter bool) error {
 	return err
 }
 
-func (a *alert) FlushFields() Alert {
+func (a *Alert) FlushFields() *Alert {
 	for i := range a.payload.Embeds {
 		a.payload.Embeds[i].Fields = nil
 	}
 	return a
 }
 
-func (a *alert) AddField(title, content string, inline bool) Alert {
+func (a *Alert) AddField(title, content string, inline bool) *Alert {
 	f := dishook.Field{
 		Name:   title,
 		Value:  content,
@@ -50,18 +42,18 @@ func (a *alert) AddField(title, content string, inline bool) Alert {
 	return a
 }
 
-func (a *alert) SetBotAvatar(url string) Alert {
+func (a *Alert) SetBotAvatar(url string) *Alert {
 	a.payload.AvatarUrl = dishook.Url(url)
 	return a
 }
 
-func (a *alert) SetBotName(name string) Alert {
+func (a *Alert) SetBotName(name string) *Alert {
 	a.payload.Username = name
 	return a
 }
 
-func New(message string) Alert {
-	return &alert{
+func New(message string) *Alert {
+	return &Alert{
 		payload: dishook.Payload{
 			Content: message,
 			Embeds: []dishook.Embed{
