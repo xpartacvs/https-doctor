@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type config struct {
+type Config struct {
 	hosts          []string
 	logLevel       zerolog.Level
 	schedule       string
@@ -24,60 +24,48 @@ type config struct {
 	grace          int
 }
 
-type Config interface {
-	Hosts() []string
-	ZerologLevel() zerolog.Level
-	Schedule() string
-	DishookBotMessage() string
-	DishookBotName() string
-	DishookBotAvatar() string
-	DishookURL() string
-	Location() *time.Location
-	Graceperiod() int
-}
-
 var (
-	cfg  *config
+	cfg  *Config
 	once sync.Once
 )
 
-func (c *config) Hosts() []string {
+func (c *Config) Hosts() []string {
 	return c.hosts
 }
 
-func (c *config) ZerologLevel() zerolog.Level {
+func (c *Config) ZerologLevel() zerolog.Level {
 	return c.logLevel
 }
 
-func (c *config) Schedule() string {
+func (c *Config) Schedule() string {
 	return c.schedule
 }
 
-func (c *config) DishookBotMessage() string {
+func (c *Config) DishookBotMessage() string {
 	return c.dishookBotMsg
 }
 
-func (c *config) DishookBotName() string {
+func (c *Config) DishookBotName() string {
 	return c.dishookBotName
 }
 
-func (c *config) DishookBotAvatar() string {
+func (c *Config) DishookBotAvatar() string {
 	return c.dishookBotAva
 }
 
-func (c *config) DishookURL() string {
+func (c *Config) DishookURL() string {
 	return c.dishookUrl
 }
 
-func (c *config) Location() *time.Location {
+func (c *Config) Location() *time.Location {
 	return c.location
 }
 
-func (c *config) Graceperiod() int {
+func (c *Config) Graceperiod() int {
 	return c.grace
 }
 
-func load() *config {
+func load() *Config {
 	fang := viper.New()
 
 	fang.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
@@ -102,7 +90,7 @@ func load() *config {
 		graceperiod *= -1
 	}
 
-	return &config{
+	return &Config{
 		hosts:          splitCSV(fang.GetString("hosts")),
 		logLevel:       setLogLevel(fang.GetString("loglevel")),
 		schedule:       setDefaultString(fang.GetString("schedule"), "0 0 * * *", true),
@@ -161,7 +149,7 @@ func setLocation(timezone string) *time.Location {
 	return loc
 }
 
-func Get() Config {
+func Get() *Config {
 	once.Do(func() {
 		cfg = load()
 	})
